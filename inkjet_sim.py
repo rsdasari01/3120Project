@@ -11,7 +11,6 @@ def m_to_pix(m):
     return m*PIX_TO_M
 
 #Droplet Gun Parameters
-gunVelocity = 20 #m/s
 printResolution = 300 #dpi
 
 #Paper Parameters
@@ -29,9 +28,21 @@ cap2Coord = [paperCoord[0]-(m_to_pix(capDistanceToPaper))-(m_to_pix(capacitorLen
 
 #Droplet parameters
 dropDiameter = 84*10**-6 #micrometers
-dropCharge = -1.9*10**-10 #C
+q = -1.9*10**-10 #C
 dropRadius = dropDiameter/2
 dropDensity = 1000 #kg/m^3
+dropVol = 4*(numpy.pi)*(dropRadius**3)/3
+dropMass = dropDensity*dropVol
+
+#Initial and Constant Kinematic Values
+ax = 0 #This always a constant
+ay = 0 #gravity is ignored
+vx = 20 #m/s -> This is always a constant
+vy = 0 #Inside the capacior will be q*E/m
+x = cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30 # Initial x-posn of dot
+y = cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10 # Initial y-posn of dot
+firing = True
+
 
 pygame.init()
 
@@ -51,7 +62,7 @@ BLUE = (0, 0, 255) #RGB for blue
 #paperX = 
 running = True
 while running:
-    clock.tick(60)
+    dt = clock.tick(60) / 100
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -66,11 +77,22 @@ while running:
     pygame.draw.rect(screen, BLACK, (cap1Coord[0] - m_to_pix(capDistanceToPaper)-50, cap1Coord[1] + (m_to_pix(capacitorWidth/2))-15, 50, 50))
     pygame.draw.rect(screen, BLACK, (cap1Coord[0] - m_to_pix(capDistanceToPaper), cap1Coord[1] + (m_to_pix(capacitorWidth/2)) - 10, 30, 40))
 
-    #Draw droplet
-    pygame.draw.circle(screen, BLUE, (cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30,cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10), m_to_pix(dropRadius))
-
     # Draw paper display
     pygame.draw.rect(screen, BLACK, (paperCoord[0], paperCoord[1], m_to_pix(paperWidth), paperCoord[3]), width=3)
+
+    #starting animation
+    if firing:
+        x += vx*dt
+        y += vy*dt
+    else:
+        pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
+    
+    #Draw droplet
+    pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
+
+    #Showing ompact on paper
+    if x >= paperCoord[0] + (m_to_pix(paperWidth)/2):
+        firing = False
     
     pygame.display.flip()
     
