@@ -91,15 +91,15 @@ while running:
 
     #starting animation
     if firing:
-        x += (vx * dt)*100
+        x += (vx*dt*10)
         if cap1Coord[0] < x : #Checks if it is inside the capacitor
             ay = q*(v[i]*10**3)/dropMass
             y += (ay*(dt**2)/2)/100
         else:
             ay = 0
-            y += (vy*dt)*10
+            y += (vy*dt)*100
     else:
-        dot = pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
+        dot = pygame.draw.circle(screen, BLUE, (x*100,y), m_to_pix(dropRadius))
     
     #Draw droplet
     pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
