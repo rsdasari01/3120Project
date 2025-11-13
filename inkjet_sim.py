@@ -43,13 +43,19 @@ x = cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30 # In
 y = cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10 # Initial y-posn of dot
 firing = True
 
+#Voltage
+V_max = 2610
+num = int((V_max + V_max)/71)
+v = numpy.linspace(-V_max, V_max, num, (V_max/71))
+
+imapcts = []
 
 pygame.init()
 
 #Window Setup
 WIDTH, HEIGHT = 2000, 1200
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Electrostatic Inkjet Simulation")
+pygame.display.set_caption("Inkjet Printer Simulation")
 
 clock = pygame.time.Clock()
 
@@ -59,10 +65,10 @@ BLACK = (0, 0, 0) #RGB for black
 GRAY = (128, 128, 128) #RGB for gray
 BLUE = (0, 0, 255) #RGB for blue
 
-#paperX = 
+i = 0
 running = True
 while running:
-    dt = clock.tick(60) / 100
+    dt = clock.tick(53) / 1000 #Time step in miliseconds
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -80,20 +86,31 @@ while running:
     # Draw paper display
     pygame.draw.rect(screen, BLACK, (paperCoord[0], paperCoord[1], m_to_pix(paperWidth), paperCoord[3]), width=3)
 
+
+
     #starting animation
     if firing:
-        x += vx*dt
-        y += vy*dt
+        x += (vx * dt)*10
+        if cap1Coord[0] < x :
+            ay = q*(v[i]*10**3)/dropMass
+            y += (ay*(dt**2)/2)/100
+        else:
+            ay = 0
+            y += (vy*dt)*10
     else:
-        pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
+        dot = pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
     
     #Draw droplet
     pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
 
-    #Showing ompact on paper
+    #Showing impact on paper
     if x >= paperCoord[0] + (m_to_pix(paperWidth)/2):
         firing = False
-    
-    pygame.display.flip()
+        i += 1
+        
+    if i > len(v):
+        running = False
+
+    pygame.display.update()
     
 pygame.quit()
