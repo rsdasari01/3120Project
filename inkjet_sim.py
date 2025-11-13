@@ -2,10 +2,14 @@ import numpy
 import pygame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
+import time
+from screeninfo import get_monitors
+monitor = get_monitors()[0]
+WIDTH, HEIGHT = monitor.width, monitor.height
 clock = pygame.time.Clock()
 #Scaling factor
-PIX_TO_M = 160000
+
+PIX_TO_M = 133.3333 * HEIGHT
 
 def m_to_pix(m):
     return m*PIX_TO_M
@@ -52,11 +56,13 @@ imapcts = []
 pygame.init()
 
 #Window Setup
-WIDTH, HEIGHT = 2000, 1200
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Inkjet Printer Simulation")
 
 clock = pygame.time.Clock()
+
+
 
 #Color Definitions
 WHITE = (255, 255, 255) #RGB for white
@@ -66,10 +72,12 @@ BLUE = (0, 0, 255) #RGB for blue
 
 i = 0
 running = True
+dots = []
+dots.append([x,y])
 while running:
-    dt = clock.tick(60) / 1000 #Time step in miliseconds
-    firing = True
-
+    print( clock.get_fps())
+    
+    dt = clock.get_time()/1000.0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -88,33 +96,35 @@ while running:
     pygame.draw.rect(screen, BLACK, (paperCoord[0], paperCoord[1], m_to_pix(paperWidth), paperCoord[3]), width=3)
 
 
-
-    #starting animation
-    if firing:
-        x += (vx*dt*10)
-        if cap1Coord[0] < x : #Checks if it is inside the capacitor
-            ay = q*(v[i]*10**3)/dropMass
-            y += (ay*(dt**2)/2)/100
+    # dots[0] += (vx * dt)*10
+    for dot in dots:
+        dot[0] += (vx * dt)*10
+        if cap1Coord[0] < dot[0] :
+            if dot[0] >= paperCoord[0] + (m_to_pix(paperWidth)/2):
+                dot[0] = paperCoord[0] + (m_to_pix(paperWidth)/2)
+            else:
+                ay = q*(v[i]*10**3)/dropMass
+                dot[1] += (ay*(dt**2)/2)/100
         else:
             ay = 0
-            y += (vy*dt)*100
-    else:
-        dot = pygame.draw.circle(screen, BLUE, (x*100,y), m_to_pix(dropRadius))
-    
-    #Draw droplet
-    pygame.draw.circle(screen, BLUE, (x,y), m_to_pix(dropRadius))
+            dot[1] += (vy*dt)*10
 
-    #Showing impact on paper
-    if x >= paperCoord[0] + (m_to_pix(paperWidth)/2):
-        firing = False
+    if dots[i][0] > cap1Coord[0]:
+        dots[i][0]= cap1Coord[0]
         i += 1
-        imapcts.append(y)
-        x = cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30 # Initial x-posn of dot
-        y = cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10 # Initial y-posn of dot
+        dots.append([x,y])
+        
+    
+        
 
-    for y_paper in imapcts:
-        dot = pygame.draw.circle(screen, BLUE, (paperCoord[0] + (m_to_pix(paperWidth)/2),y_paper), m_to_pix(dropRadius))
+    for drop in dots:
+        pygame.draw.circle(screen, BLUE, drop, m_to_pix(dropRadius))
+        
+        
+    if i > len(v):
+        time.sleep(20000)
 
     pygame.display.update()
+    clock.tick(53)
     
 pygame.quit()
