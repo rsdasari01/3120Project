@@ -41,7 +41,6 @@ vx = 20 #m/s -> This is always a constant
 vy = 0 #Inside the capacior will be q*E/m
 x = cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30 # Initial x-posn of dot
 y = cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10 # Initial y-posn of dot
-firing = True
 
 #Voltage
 V_max = 2610
@@ -68,7 +67,9 @@ BLUE = (0, 0, 255) #RGB for blue
 i = 0
 running = True
 while running:
-    dt = clock.tick(53) / 1000 #Time step in miliseconds
+    dt = clock.tick(60) / 1000 #Time step in miliseconds
+    firing = True
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -90,8 +91,8 @@ while running:
 
     #starting animation
     if firing:
-        x += (vx * dt)*10
-        if cap1Coord[0] < x :
+        x += (vx * dt)*100
+        if cap1Coord[0] < x : #Checks if it is inside the capacitor
             ay = q*(v[i]*10**3)/dropMass
             y += (ay*(dt**2)/2)/100
         else:
@@ -107,9 +108,12 @@ while running:
     if x >= paperCoord[0] + (m_to_pix(paperWidth)/2):
         firing = False
         i += 1
-        
-    if i > len(v):
-        running = False
+        imapcts.append(y)
+        x = cap1Coord[0] - m_to_pix(capDistanceToPaper) + m_to_pix(dropRadius) + 30 # Initial x-posn of dot
+        y = cap1Coord[1] + (m_to_pix(capacitorWidth/2)) + 10 # Initial y-posn of dot
+
+    for y_paper in imapcts:
+        dot = pygame.draw.circle(screen, BLUE, (paperCoord[0] + (m_to_pix(paperWidth)/2),y_paper), m_to_pix(dropRadius))
 
     pygame.display.update()
     
