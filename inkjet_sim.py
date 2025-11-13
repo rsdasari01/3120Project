@@ -1,8 +1,8 @@
 import numpy
+import time
 import pygame
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import time
 from screeninfo import get_monitors
 monitor = get_monitors()[0]
 WIDTH, HEIGHT = monitor.width, monitor.height
@@ -74,6 +74,10 @@ i = 0
 running = True
 dots = []
 dots.append([x,y])
+start = time.time()
+
+font = pygame.font.Font(None, 40)
+
 while running:
     print( clock.get_fps())
     
@@ -119,12 +123,15 @@ while running:
 
     for drop in dots:
         pygame.draw.circle(screen, BLUE, drop, m_to_pix(dropRadius))
+    
+    screen.blit(font.render(f"Time elapsed: {(time.time() - start)/1000} ms", True, BLACK), (80, 305))
+    screen.blit(font.render(f"Voltage Applied: {v[i]} V", True, BLACK), (80, 335))
         
         
     if i > len(v):
-        time.sleep(20000)
+        time.sleep(200000)
 
     pygame.display.update()
-    clock.tick(53)
+    clock.tick(60)
     
 pygame.quit()
