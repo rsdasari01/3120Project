@@ -1,5 +1,7 @@
 import math
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # DROPLET CONSTANTS
 droplet_diameter = 8.4e-5
@@ -71,11 +73,6 @@ for i in range(N):
     y_vector[index2 : index3] = v_exit * t_local2 + y_exit
     y_vector[index3:] = y_vector[index3 - 1]
     y_array[i] = y_vector
-
-
-
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 dt = t_global[1] - t_global[0]
 N_drops = x_array.shape[0]
