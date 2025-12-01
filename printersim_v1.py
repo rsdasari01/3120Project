@@ -2,132 +2,133 @@ import math
 import numpy as np
 
 # DROPLET CONSTANTS
-droplet_diameter = 8.4e-5                               # meters
-r = droplet_diameter / 2                                # meters
-q = -1.9e-10                                            # coulombs
-droplet_density = 1000                                  # kg/m3
-droplet_volume = (4/3)*(np.pi * r**3)                   # m3
-m = droplet_density * droplet_volume                    # kg
+droplet_diameter = 8.4e-5
+r = droplet_diameter / 2
+q = -1.9e-10
+droplet_density = 1000
+droplet_volume = (4/3)*(np.pi * r**3)
+m = droplet_density * droplet_volume
 
 # SETUP
-w = 0.001                                               # meters
-D = 0.003                                               # meters
-L1 = 0.0005                                             # meters
-L2 = 0.00125                                            # meters
-L0 = D - (L1 + L2)                                      # meters
-v_x = 20.0                                              # m/s
-dpm = 300/0.0254                                        # dots per meter
+w = 0.001
+D = 0.003
+L1 = 0.0005
+L2 = 0.00125
+L0 = D - (L1 + L2)                                      # distance from gun to capacitor
+dpm = 300/0.0254                                        # 300 dpi to dpm
 
 # KINEMATIC CONSTANTS
-Tc = L1 / v_x                                           # seconds
-T1 = L0 / v_x                                           # seconds
-T2 = T1 + Tc                                            # seconds
-T3 = D / v_x                                            # seconds
-firing_period = Tc                                     # seconds
+v_z = 20.0
+Tc = L1 / v_z                                           # time in capacitor
+T1 = L0 / v_z                                           # time to enter capacitor
+T2 = T1 + Tc                                            # time to exit capacitor
+T3 = D / v_z                                            # time to hit wall
+firing_period = Tc
+V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1          # necessary voltage step for 300 dpi
 
-length_to_draw = 0.006
-N = math.floor(dpm * length_to_draw) + 1
-a = q*Tc
-b = m*w
-V_step = ( (a/b) * (Tc/2 + (T3 - T2)) * dpm ) ** -1
-T_TOTAL = T3 + (N - 1) * firing_period
+
+
+length_to_draw = .006                                                   # length of line
+N = math.floor(dpm * length_to_draw) + 1                                # number of dots required
+T_TOTAL = T3 + (N - 1) * firing_period                                  # total time for all droplets to finish
+
 NUM_POINTS = 1000
-time = np.linspace(0, T_TOTAL, NUM_POINTS)
+t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
+
 def get_index(time):
     index = math.floor(time * NUM_POINTS/T_TOTAL)
     return index
 
-all_x_positions = np.zeros((N, NUM_POINTS))
-all_y_positions = np.zeros((N, NUM_POINTS))
-
-T3_index = get_index(T3)
+x_array = np.zeros((N, NUM_POINTS))
+y_array = np.zeros((N, NUM_POINTS))
+z_array = np.zeros((N, NUM_POINTS)) + D
 
 for i in range(N):
-    start_index = get_index(firing_period * i)
-    end_index = get_index(firing_period * i + T3)
-    diff_index = end_index - start_index
-    x_vector = all_x_positions[i]
+    # Time
+    index0 = get_index(firing_period * i)
+    index1 = get_index(firing_period * i + T1)
+    index2 = get_index(firing_period * i + T2)
+    index3 = get_index(firing_period * i + T3)
+    t_local0 = t_global[index0:index3] - t_global[index0]
+    t_local1 = t_global[index1:index2] - t_global[index1]
+    t_local2 = t_global[index2:index3] - t_global[index2]
 
-    try:
-        x_vector[start_index: end_index + 1] = v_x * time[: T3_index + 1]
-        x_vector[end_index + 1:] = D
+    # Kinematics
+    V = V_step*(i - math.floor(N/2))
+    E = V / w
+    v_exit = (q*E*Tc) / m
+    y_exit = (q*E*Tc**2) / (2*m)
 
-    except ValueError:
-        x_vector[start_index: end_index] = v_x * time[: T3_index + 1]
-        x_vector[end_index:] = D
+    # z positions
+    z_vector = z_array[i]
+    z_vector[index0:index3] = -v_z * t_local0 + D
+    z_vector[index3:] = 0
+    z_array[i] = z_vector
 
-    all_x_positions[i, :] = x_vector
+    # y positions
+    y_vector = y_array[i]
+    y_vector[index1 : index2] = (q*E)/(2*m) * t_local1 **2
+    y_vector[index2 : index3] = v_exit * t_local2 + y_exit
+    y_vector[index3:] = y_vector[index3 - 1]
+    y_array[i] = y_vector
 
 
 
-# FROM GOOGLE GEMINI
-# FOR VISUALIZATION PURPOSES
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# 1. Initialize plot
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.set_xlim(-0.0001, D + 0.0005) # Add a small buffer
-ax.set_ylim(-0.003, 0.003)       # Adjust Y limits based on max deflection
-ax.set_title("Electrostatic Droplet Deflection")
-ax.set_xlabel("X Position (m)")
-ax.set_ylabel("Y Position (m)")
-ax.grid(True)
+dt = t_global[1] - t_global[0]
+N_drops = x_array.shape[0]
 
-# 2. Create an artist (Line2D object) for *each* droplet
-# These will be updated in the animation loop.
-droplets_artists = []
-for i in range(N):
-    # 'o' marker style, ms=5 (marker size), color can be changed
-    line, = ax.plot([], [], 'o', ms=3, color=plt.cm.viridis(i / N))
-    droplets_artists.append(line)
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.view_init(elev=-20, azim=70, roll=-180)
 
-# 3. Initialization function (required by FuncAnimation)
-def init():
-    """Sets up the initial state of the plot."""
-    for line in droplets_artists:
-        line.set_data([], [])
-    return droplets_artists
-
-
-NUM_POINTS = all_x_positions.shape[1]
-
-
-def update_frame(frame):
-    """
-    Updates the position of all N droplets for the current frame index.
-    """
-
-    # Loop over all N droplets
-    for i in range(N):
-        # The current position for particle 'i' is the data at column 'frame'
-
-        # Get the X and Y coordinates at the current time step (frame)
-        x_current = all_x_positions[i, frame]
-        y_current = all_y_positions[i, frame]
-
-        # Update the data for the specific droplet's artist
-        # The artist is a Line2D object; we set its data to the current point.
-        droplets_artists[i].set_data([x_current], [y_current])
-
-    # Update the title to show physical time elapsed
-    current_time_phys = T_TOTAL * (frame / (NUM_POINTS - 1))
-    ax.set_title(f"Time: {current_time_phys * 1000:.2f} ms")
-
-    return droplets_artists
-
-TOTAL_PLAYBACK_MS = 1000
-INTERVAL_MS = TOTAL_PLAYBACK_MS / NUM_POINTS
-
-anim = FuncAnimation(
-    fig,
-    update_frame,
-    frames=NUM_POINTS,
-    init_func=init,
-    interval=INTERVAL_MS, # Controls the speed (delay between frames)
-    blit=True # Optimize drawing for speed
+scat = ax.scatter(
+    x_array[:, 0] * 1000,
+    y_array[:, 0] * 1000,
+    z_array[:, 0] * 1000,
+    s=5
 )
 
-# Use one of the following commands to display the animation:
-# 1. To display in a live plot window (standard desktop environment):
+# Axis labels in mm
+ax.set_xlabel("X (mm)")
+ax.set_ylabel("Y (mm)")
+ax.set_zlabel("Z (mm)")
+
+# Axis limits (mm)
+ax.set_xlim(-3, 3)
+ax.set_ylim(np.min(y_array) * 1000,
+            np.max(y_array) * 1000)
+ax.set_zlim(D * 1000, 0)   # change once you have real z data
+
+# Time tracker text (upper-left)
+time_text = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
+
+# ------------------------------------------------------------
+# UPDATE FUNCTION FOR ANIMATION
+# ------------------------------------------------------------
+def update(frame):
+    x = x_array[:, frame] * 1000  # convert to mm
+    y = y_array[:, frame] * 1000
+    z = z_array[:, frame] * 1000
+
+    scat._offsets3d = (x, y, z)
+
+    # Update time (ms)
+    time_text.set_text(f"t = {frame * dt * 1000:.2f} ms")
+
+    return scat, time_text
+
+# ------------------------------------------------------------
+# ANIMATION DRIVER
+# ------------------------------------------------------------
+anim = FuncAnimation(
+    fig,
+    update,
+    frames=NUM_POINTS,
+    interval=1,   # 1 ms per frame (adjust if needed)
+    blit=False
+)
+
 plt.show()
