@@ -1,4 +1,3 @@
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -31,14 +30,14 @@ V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1          # necess
 
 
 length_to_draw = .006                                                   # length of line
-N = math.floor(dpm * length_to_draw) + 1                                # number of dots required
+N = np.floor(dpm * length_to_draw) + 1                                # number of dots required
 T_TOTAL = T3 + (N - 1) * firing_period                                  # total time for all droplets to finish
 
 NUM_POINTS = 1000
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
 def get_index(time):
-    index = math.floor(time * NUM_POINTS/T_TOTAL)
+    index = np.floor(time * NUM_POINTS/T_TOTAL)
     return index
 
 x_array = np.zeros((N, NUM_POINTS))
@@ -56,7 +55,7 @@ for i in range(N):
     t_local2 = t_global[index2:index3] - t_global[index2]
 
     # Kinematics
-    V = V_step*(i - math.floor(N/2))
+    V = V_step*(i - np.floor(N/2))
     E = V / w
     v_exit = (q*E*Tc) / m
     y_exit = (q*E*Tc**2) / (2*m)
@@ -129,3 +128,4 @@ anim = FuncAnimation(
 )
 
 plt.show()
+
