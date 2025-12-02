@@ -30,14 +30,14 @@ V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1          # necess
 
 
 length_to_draw = .006                                                   # length of line
-N = np.floor(dpm * length_to_draw) + 1                                # number of dots required
+N = np.floor(dpm * length_to_draw).astype(int) + 1                                # number of dots required
 T_TOTAL = T3 + (N - 1) * firing_period                                  # total time for all droplets to finish
 
 NUM_POINTS = 1000
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
 def get_index(time):
-    index = np.floor(time * NUM_POINTS/T_TOTAL)
+    index = np.floor(time * NUM_POINTS/T_TOTAL).astype(int)
     return index
 
 x_array = np.zeros((N, NUM_POINTS))
@@ -128,4 +128,5 @@ anim = FuncAnimation(
 )
 
 plt.show()
+
 
