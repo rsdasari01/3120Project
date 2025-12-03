@@ -44,87 +44,51 @@ y_array = np.zeros((N, NUM_POINTS))
 z_array = np.zeros((N, NUM_POINTS)) + D
 
 for i in range(N):
-    if i < 71:
-        # Time
-        index0 = get_index(firing_period * i)
-        index1 = get_index(firing_period * i + T1)
-        index2 = get_index(firing_period * i + T2)
-        index3 = get_index(firing_period * i + T3)
-        t_local0 = t_global[index0:index3] - t_global[index0]
-        t_local1 = t_global[index1:index2] - t_global[index1]
-        t_local2 = t_global[index2:index3] - t_global[index2]
-
-        # Kinematics
-        Vx = (0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
-        Ex = Vx / w
-        vx_exit = (q * Ex * Tc) / m
-        x_exit = (q * Ex * Tc ** 2) / (2 * m)
-
-        Vy = V_step * (i - np.floor(N / 4))
-        Ey = Vy / w
-        vy_exit = (q * Ey * Tc) / m
-        y_exit = (q * Ey * Tc ** 2) / (2 * m)
-
-        # z positions
-        z_vector = z_array[i]
-        z_vector[index0:index3] = -v_z * t_local0 + D
-        z_vector[index3:] = 0
-        z_array[i] = z_vector
-
-        # y positions
-        y_vector = y_array[i]
-        y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
-        y_vector[index2: index3] = vy_exit * t_local2 + y_exit
-        y_vector[index3:] = y_vector[index3 - 1]
-        y_array[i] = y_vector
-
-        # x positions
-        x_vector = x_array[i]
-        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
-        x_vector[index2: index3] = vx_exit * t_local2 + x_exit
-        x_vector[index3:] = x_vector[index3 - 1]
-        x_array[i] = x_vector
-
+    if i < N//2:
+        sign = 1
+        shift = 0
     else:
-        # Time
-        index0 = get_index(firing_period * i)
-        index1 = get_index(firing_period * i + T1)
-        index2 = get_index(firing_period * i + T2)
-        index3 = get_index(firing_period * i + T3)
-        t_local0 = t_global[index0:index3] - t_global[index0]
-        t_local1 = t_global[index1:index2] - t_global[index1]
-        t_local2 = t_global[index2:index3] - t_global[index2]
+        sign = -1
+        shift = N//2
+    # Time
+    index0 = get_index(firing_period * i)
+    index1 = get_index(firing_period * i + T1)
+    index2 = get_index(firing_period * i + T2)
+    index3 = get_index(firing_period * i + T3)
+    t_local0 = t_global[index0:index3] - t_global[index0]
+    t_local1 = t_global[index1:index2] - t_global[index1]
+    t_local2 = t_global[index2:index3] - t_global[index2]
 
-        # Kinematics
-        Vx = -(0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
-        Ex = Vx / w
-        vx_exit = (q * Ex * Tc) / m
-        x_exit = (q * Ex * Tc ** 2) / (2 * m)
+    # Kinematics
+    Vx = sign * (0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
+    Ex = Vx / w
+    vx_exit = (q * Ex * Tc) / m
+    x_exit = (q * Ex * Tc ** 2) / (2 * m)
 
-        Vy = V_step * (i-71 - np.floor(N / 4))
-        Ey = Vy / w
-        vy_exit = (q * Ey * Tc) / m
-        y_exit = (q * Ey * Tc ** 2) / (2 * m)
+    Vy = V_step * (i - shift - np.floor(N / 4))
+    Ey = Vy / w
+    vy_exit = (q * Ey * Tc) / m
+    y_exit = (q * Ey * Tc ** 2) / (2 * m)
 
-        # z positions
-        z_vector = z_array[i]
-        z_vector[index0:index3] = -v_z * t_local0 + D
-        z_vector[index3:] = 0
-        z_array[i] = z_vector
+    # z positions
+    z_vector = z_array[i]
+    z_vector[index0:index3] = -v_z * t_local0 + D
+    z_vector[index3:] = 0
+    z_array[i] = z_vector
 
-        # y positions
-        y_vector = y_array[i]
-        y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
-        y_vector[index2: index3] = vy_exit * t_local2 + y_exit
-        y_vector[index3:] = y_vector[index3 - 1]
-        y_array[i] = y_vector
+    # y positions
+    y_vector = y_array[i]
+    y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
+    y_vector[index2: index3] = vy_exit * t_local2 + y_exit
+    y_vector[index3:] = y_vector[index3 - 1]
+    y_array[i] = y_vector
 
-        # x positions
-        x_vector = x_array[i]
-        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
-        x_vector[index2: index3] = vx_exit * t_local2 + x_exit
-        x_vector[index3:] = x_vector[index3 - 1]
-        x_array[i] = x_vector
+    # x positions
+    x_vector = x_array[i]
+    x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
+    x_vector[index2: index3] = vx_exit * t_local2 + x_exit
+    x_vector[index3:] = x_vector[index3 - 1]
+    x_array[i] = x_vector
 
 dt = t_global[1] - t_global[0]
 N_drops = x_array.shape[0]
