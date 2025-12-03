@@ -31,7 +31,7 @@ V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1          # necess
 
 length_to_draw = .006                                                   # length of line
 N = np.floor(dpm * length_to_draw).astype(int) + 1                                # number of dots required
-T_TOTAL = T3 + (N - 1) * firing_period                                  # total time for all droplets to finish
+T_TOTAL = (T3 + (N - 1) * firing_period)                                  # total time for all droplets to finish
 
 NUM_POINTS = 1000
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
@@ -55,10 +55,15 @@ for i in range(N):
     t_local2 = t_global[index2:index3] - t_global[index2]
 
     # Kinematics
-    V = V_step*(i - np.floor(N/2))
-    E = V / w
-    v_exit = (q*E*Tc) / m
-    y_exit = (q*E*Tc**2) / (2*m)
+    Vx = (0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
+    Ex = Vx / w
+    vx_exit = (q * Ex * Tc) / m
+    x_exit = (q * Ex * Tc ** 2) / (2 * m)
+
+    Vy = V_step * (i - np.floor(N / 2))
+    Ey = Vy / w
+    vy_exit = (q * Ey * Tc) / m
+    y_exit = (q * Ey * Tc ** 2) / (2 * m)
 
     # z positions
     z_vector = z_array[i]
@@ -68,10 +73,17 @@ for i in range(N):
 
     # y positions
     y_vector = y_array[i]
-    y_vector[index1 : index2] = (q*E)/(2*m) * t_local1 **2
-    y_vector[index2 : index3] = v_exit * t_local2 + y_exit
+    y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
+    y_vector[index2: index3] = vy_exit * t_local2 + y_exit
     y_vector[index3:] = y_vector[index3 - 1]
     y_array[i] = y_vector
+
+    # x positions
+    x_vector = x_array[i]
+    x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
+    x_vector[index2: index3] = vx_exit * t_local2 + x_exit
+    x_vector[index3:] = x_vector[index3 - 1]
+    x_array[i] = x_vector
 
 dt = t_global[1] - t_global[0]
 N_drops = x_array.shape[0]
@@ -128,5 +140,3 @@ anim = FuncAnimation(
 )
 
 plt.show()
-
-
