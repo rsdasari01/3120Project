@@ -30,9 +30,8 @@ V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1          # necess
 
 
 length_to_draw = .006                                                   # length of line
-N = np.floor(dpm * length_to_draw).astype(int) + 1                                # number of dots required
+N = 2*(np.floor(dpm * length_to_draw).astype(int) + 1)                                # number of dots required
 T_TOTAL = (T3 + (N - 1) * firing_period)                                  # total time for all droplets to finish
-
 NUM_POINTS = 1000
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
@@ -45,45 +44,87 @@ y_array = np.zeros((N, NUM_POINTS))
 z_array = np.zeros((N, NUM_POINTS)) + D
 
 for i in range(N):
-    # Time
-    index0 = get_index(firing_period * i)
-    index1 = get_index(firing_period * i + T1)
-    index2 = get_index(firing_period * i + T2)
-    index3 = get_index(firing_period * i + T3)
-    t_local0 = t_global[index0:index3] - t_global[index0]
-    t_local1 = t_global[index1:index2] - t_global[index1]
-    t_local2 = t_global[index2:index3] - t_global[index2]
+    if i < 71:
+        # Time
+        index0 = get_index(firing_period * i)
+        index1 = get_index(firing_period * i + T1)
+        index2 = get_index(firing_period * i + T2)
+        index3 = get_index(firing_period * i + T3)
+        t_local0 = t_global[index0:index3] - t_global[index0]
+        t_local1 = t_global[index1:index2] - t_global[index1]
+        t_local2 = t_global[index2:index3] - t_global[index2]
 
-    # Kinematics
-    Vx = (0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
-    Ex = Vx / w
-    vx_exit = (q * Ex * Tc) / m
-    x_exit = (q * Ex * Tc ** 2) / (2 * m)
+        # Kinematics
+        Vx = (0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
+        Ex = Vx / w
+        vx_exit = (q * Ex * Tc) / m
+        x_exit = (q * Ex * Tc ** 2) / (2 * m)
 
-    Vy = V_step * (i - np.floor(N / 2))
-    Ey = Vy / w
-    vy_exit = (q * Ey * Tc) / m
-    y_exit = (q * Ey * Tc ** 2) / (2 * m)
+        Vy = V_step * (i - np.floor(N / 4))
+        Ey = Vy / w
+        vy_exit = (q * Ey * Tc) / m
+        y_exit = (q * Ey * Tc ** 2) / (2 * m)
 
-    # z positions
-    z_vector = z_array[i]
-    z_vector[index0:index3] = -v_z * t_local0 + D
-    z_vector[index3:] = 0
-    z_array[i] = z_vector
+        # z positions
+        z_vector = z_array[i]
+        z_vector[index0:index3] = -v_z * t_local0 + D
+        z_vector[index3:] = 0
+        z_array[i] = z_vector
 
-    # y positions
-    y_vector = y_array[i]
-    y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
-    y_vector[index2: index3] = vy_exit * t_local2 + y_exit
-    y_vector[index3:] = y_vector[index3 - 1]
-    y_array[i] = y_vector
+        # y positions
+        y_vector = y_array[i]
+        y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
+        y_vector[index2: index3] = vy_exit * t_local2 + y_exit
+        y_vector[index3:] = y_vector[index3 - 1]
+        y_array[i] = y_vector
 
-    # x positions
-    x_vector = x_array[i]
-    x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
-    x_vector[index2: index3] = vx_exit * t_local2 + x_exit
-    x_vector[index3:] = x_vector[index3 - 1]
-    x_array[i] = x_vector
+        # x positions
+        x_vector = x_array[i]
+        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
+        x_vector[index2: index3] = vx_exit * t_local2 + x_exit
+        x_vector[index3:] = x_vector[index3 - 1]
+        x_array[i] = x_vector
+
+    else:
+        # Time
+        index0 = get_index(firing_period * i)
+        index1 = get_index(firing_period * i + T1)
+        index2 = get_index(firing_period * i + T2)
+        index3 = get_index(firing_period * i + T3)
+        t_local0 = t_global[index0:index3] - t_global[index0]
+        t_local1 = t_global[index1:index2] - t_global[index1]
+        t_local2 = t_global[index2:index3] - t_global[index2]
+
+        # Kinematics
+        Vx = -(0.001 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
+        Ex = Vx / w
+        vx_exit = (q * Ex * Tc) / m
+        x_exit = (q * Ex * Tc ** 2) / (2 * m)
+
+        Vy = V_step * (i-71 - np.floor(N / 4))
+        Ey = Vy / w
+        vy_exit = (q * Ey * Tc) / m
+        y_exit = (q * Ey * Tc ** 2) / (2 * m)
+
+        # z positions
+        z_vector = z_array[i]
+        z_vector[index0:index3] = -v_z * t_local0 + D
+        z_vector[index3:] = 0
+        z_array[i] = z_vector
+
+        # y positions
+        y_vector = y_array[i]
+        y_vector[index1: index2] = (q * Ey) / (2 * m) * t_local1 ** 2
+        y_vector[index2: index3] = vy_exit * t_local2 + y_exit
+        y_vector[index3:] = y_vector[index3 - 1]
+        y_array[i] = y_vector
+
+        # x positions
+        x_vector = x_array[i]
+        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
+        x_vector[index2: index3] = vx_exit * t_local2 + x_exit
+        x_vector[index3:] = x_vector[index3 - 1]
+        x_array[i] = x_vector
 
 dt = t_global[1] - t_global[0]
 N_drops = x_array.shape[0]
@@ -106,8 +147,7 @@ ax.set_zlabel("Z (mm)")
 
 # Axis limits (mm)
 ax.set_xlim(-3, 3)
-ax.set_ylim(np.min(y_array) * 1000,
-            np.max(y_array) * 1000)
+ax.set_ylim(-3, 3)
 ax.set_zlim(D * 1000, 0)   # change once you have real z data
 
 # Time tracker text (upper-left)
