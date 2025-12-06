@@ -74,7 +74,7 @@ This is assuming the distance to the paper(D), and $V_X$ are constant. The lengt
         \hline
     \end{tabular}
 \end{center}
-This means that for a 1mm long line, the printer would require 11.81 dots. For the simulation, this isn't possible since the number of dots has to be an integer value, which means we round up to 12 dots. From here,
+This means that for a 1mm long line, the printer would require 11.81 dots. For the simulation, this isn't possible since the number of dots has to be an integer value, which means we round up to \textbf{12 dots}. From here,
 \begin{center}
     Time for the first dot to hit the paper = \scalebox{1.25}{$\frac{D}{V_X}$}\\
     The remaining \textbf{N - 1} droplets are spaced equally from each other due to the constant firing rate and will hit the paper by the time the next droplet is fired, so the remaining time is: \scalebox{1.25}{$(N-1)*T_F$} \\
@@ -111,7 +111,7 @@ The largest letter "I" that can be drawn is 6mm, this is due to the maximum defl
 This voltage value gives us the exit velocity of the droplet:
 \begin{center}
     \scalebox{1.25}{$V_{Y_3} = \frac{q*E_{max}*T_C}{2*m} = 40\ m/s$} \\
-    \scalebox{1.25}{$\therefore Y_{3,max} = 2.5\ mm$}
+    \scalebox{1.25}{$\therefore Y_{3,max} = 2.5\ mm$} \\
     \begin{tabular}{| c |}
         \hline\
         \\
@@ -119,4 +119,19 @@ This voltage value gives us the exit velocity of the droplet:
         \hline        
     \end{tabular}
 \end{center}
+
+\section*{Q4}
+\subsection*{Resimulate the act of drawing letter ‘I’ as big as possible consuming as small time as possible for each of the following adjustment of the parameter:\\ }
+\subsubsection*{a) The distance between the capacitor and the paper L2 is threefold increased, and everything else remains same\\}
+\begin{center}
+    \scalebox{1.25}{$L_{2,new} = 3*L_2 = 3.75\ mm$} \\
+    \scalebox{1.25}{Time from capacitor to paper = $T_{3,new} = \frac{3.75\ mm}{20\ mm/ms} = 0.1875\ ms$} \\
+    \scalebox{1.25}{$Y_{3,max,new} = V_{Y_3}*T_{3,new} = 40*0.1875 = 7.5\ mm$}\\
+    \begin{tabular}{| c |}
+        \hline
+        \scalebox{1.25}{$\therefore New Biggest "I" = 16\ mm$}\\
+        \hline        
+    \end{tabular}
+\end{center}
+
 \end{document}
