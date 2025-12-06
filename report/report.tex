@@ -1,0 +1,55 @@
+\documentclass[a4paper]{article}
+\usepackage{lab}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+\begin{document}
+\begin{titlepage}
+    \thispagestyle{fancy} % Makes the page fancy
+    \rhead{}
+    \chead{}
+    \lhead{ECGR 3120-001} % For the left header
+    \rfoot{}
+    \cfoot{}
+    \lfoot{}
+    \renewcommand{\headrulewidth}{0pt}
+    \begin{center}
+        \vspace*{2cm}
+
+
+        \Large\textbf{University of North Carolina at Charlotte \\ [1pt]
+        Department of Electrical and Computer Engineering \\ [2pt]
+        \emph{ECGR 3120 Inkjet Printer Simulation} \\ [7pt]
+        }
+
+        \noindent\rule{15cm}{0.4pt}
+        \vfill
+        \vspace{3cm}
+        \textit{Group Project Report} \\
+        Team Members: Govind Menon,\\ Adi Chettri, and\\ Rushil Dasari \\
+        Date: December 5, 2025 \\
+
+        \vspace{1cm}
+
+        \vfill
+        \vfill
+        \vfill
+
+    \end{center}
+\end{titlepage}
+
+\section*{Q1}
+\subsection*{Simulate the motion of the droplet when no voltage is applied across the capacitor. How much time would it take for the droplet to reach the center of the paper?}\par
+
+The droplet is travelling along the x-axis towards the paper. Because there is no acceleration in the x-direction: \\ \\
+$V_X = 20m/s\ (constant)$ which is independent of $V_Y$.\\ \\
+The path taken by each droplet regardless of the voltage applied is the same in the x direction. This displacement can be calculated by integrating $V_X$ which gives us:\\ \\
+$S_X = 20*t\ m$. Solving for time gives us: $\frac{S_X}{20} = t\ sec$. It is given that the distance from droplet gun to the paper is 3mm.\par
+Therefore, the time taken by a droplet to reach the center of the paper with no voltage applied across the capacitor is \textbf{0.15 milliseconds}.
+
+\section*{Q2}
+\subsection*{Simulate the act of drawing a vertical line (similar to the letter “I” ) along the center of the paper at 300 dpi resolution. How much time would it take to draw the letter “I”?}\par
+
+
+\end{document}
