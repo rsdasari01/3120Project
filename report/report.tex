@@ -3,6 +3,9 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{relsize}
+\usepackage{amssymb}
 
 \begin{document}
 \begin{titlepage}
@@ -42,14 +45,56 @@
 \section*{Q1}
 \subsection*{Simulate the motion of the droplet when no voltage is applied across the capacitor. How much time would it take for the droplet to reach the center of the paper?}\par
 
-The droplet is travelling along the x-axis towards the paper. Because there is no acceleration in the x-direction: \\ \\
-$V_X = 20m/s\ (constant)$ which is independent of $V_Y$.\\ \\
-The path taken by each droplet regardless of the voltage applied is the same in the x direction. This displacement can be calculated by integrating $V_X$ which gives us:\\ \\
-$S_X = 20*t\ m$. Solving for time gives us: $\frac{S_X}{20} = t\ sec$. It is given that the distance from droplet gun to the paper is 3mm.\par
+The droplet is travelling along the x-axis towards the paper. Because there is no acceleration in the x-direction:
+\begin{center}
+    $V_X = 20m/s = 20,000m/s\ (constant)$ which is independent of $V_Y$.\\
+\end{center}
+The path taken by each droplet regardless of the voltage applied is the same in the x direction. This displacement can be calculated by integrating $V_X$ which gives us:
+\begin{center}
+    $S_X = 20*t\ mm$\\
+\end{center} 
+Solving for time gives us: $\frac{S_X}{20} = t\ sec$. It is given that the distance from droplet gun to the paper is 3mm.\par
 Therefore, the time taken by a droplet to reach the center of the paper with no voltage applied across the capacitor is \textbf{0.15 milliseconds}.
 
 \section*{Q2}
-\subsection*{Simulate the act of drawing a vertical line (similar to the letter “I” ) along the center of the paper at 300 dpi resolution. How much time would it take to draw the letter “I”?}\par
+\subsection*{Simulate the act of drawing a vertical line (similar to the letter “I” ) along the center of the paper at 300 dpi resolution. How much time would it take to draw the letter “I”?}
 
+The time it takes for the letter \textbf{I}, to be drawn depends on two factors:
+\begin{itemize}
+    \item Length of the letter
+    \item Printer's firing rate($T_F$)
+\end{itemize}
+This is assuming the distance to the paper(D), and $V_X$ are constant. The length of the letter determines the number of droplets (N) required to draw it. To keep the units we are using uniform we are converting the given resolution from inches to meters:
 
+\begin{center}
+    \scalebox{1.25}{$\frac{300\ dots}{1in}*\frac{1in}{25.4mm} =$}
+    \begin{tabular}{| c |}
+        \hline
+        \scalebox{1.15}{11.81 dpmm}\\
+        \hline
+    \end{tabular}
+\end{center}
+This means that for a 1mm long line, the printer would require 11.81 dots. For the simulation, this isn't possible since the number of dots has to be an integer value, which means we round up to 12 dots. From here,
+\begin{center}
+    Time for the first dot to hit the paper = \scalebox{1.25}{$\frac{D}{V_X}$}\\
+    The remaining \textbf{N - 1} droplets are spaced equally from each other due to the constant firing rate and will hit the paper by the time the next droplet is fired, so the remaining time is: \scalebox{1.25}{$(N-1)*T_F$} \\
+    Therefore, \scalebox{1.25}{$T_{total} = \frac{D}{V_X}+ (N-1)*T_F$}
+\end{center}
+Moving on, we need to print "I" in the shortest possible time, to do so we need to decide on the fastest possible firing rate. $T_F$ is dependent on the capacitors as they cannot have more than one droplet passing through them at a time as each droplet needs to be influenced by a different amount of voltage applied to the capacitors. This implies that:
+\begin{center}
+    \scalebox{1.25}{$T_{F,max} = T_C = \frac{L_1}{V_X} = 25\ \mu s = 0.025\ ms$}
+\end{center}
+Here, $T_C$ is the time spent by each droplet inside the capacitor.\\
+We know have all the parts required to find the total time required to the draw a vertical line across the paper:
+\begin{center}
+    \scalebox{1.25}{$T_{total} = \frac{D}{V_X}+(N-1)*T_C = \frac{3\ mm}{20\ mm/ms} + (12 -1)*0.025\ ms$}
+    \vspace{1cm}
+    \begin{tabular}{| c |}
+        \hline
+        \scalebox{1.25}{$\therefore T_{total} = 0.425\ ms$} \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\section*{Q3}
 \end{document}
