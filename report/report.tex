@@ -101,10 +101,10 @@ We know have all the parts required to find the total time required to the draw 
 
 The largest letter "I" that can be drawn is 6mm, this is due to the maximum deflection within the capacitor being 0.5m. If you set the y displacement formula equal to 0.5:
 \begin{center}
-    \scalebox{1.25}{$Y_{C,max} = 0.0005mm = \frac{q*E*t^2}{2m}; E = \frac{V}{w}$; w = width between capacitors}\\
+    \scalebox{1.25}{$Y_{C,max} = 0.5mm = \frac{q*E*t^2}{2m}; E = \frac{V}{w}$; w = width between capacitors}\\
     \begin{tabular}{| c |}
         \hline
-        \scalebox{1.25}{$V_{max} = \frac{(0.0005\ mm)*2*m*w}{q*t^2} = 2610.11\ V$} \\
+        \scalebox{1.25}{$V_{max} = \frac{(0.5\ mm)*2*m*w}{q*t^2} = 2610.11\ V$} \\
         \hline        
     \end{tabular}
 \end{center}
@@ -128,10 +128,24 @@ This voltage value gives us the exit velocity of the droplet:
     \scalebox{1.25}{Time from capacitor to paper = $T_{3,new} = \frac{3.75\ mm}{20\ mm/ms} = 0.1875\ ms$} \\
     \scalebox{1.25}{$Y_{3,max,new} = V_{Y_3}*T_{3,new} = 40*0.1875 = 7.5\ mm$}\\
     \begin{tabular}{| c |}
-        \hline
-        \scalebox{1.25}{$\therefore New Biggest "I" = 16\ mm$}\\
-        \hline        
+        \hline \\
+        \scalebox{1.25}{$\therefore Biggest\ "I" = 16\ mm$}\\ \\
+        \hline     
     \end{tabular}
 \end{center}
 
+\subsubsection*{b) L1 is twofold increased, and everything else remains same}
+\begin{center}
+    \scalebox{1.25}{$L_{1,new} = 2*L_1 = 1\ mm$} \\
+    \scalebox{1.25}{$\Rightarrow T_{F,max} = T_C = \frac{1}{V_X} = 50\ \mu s$} \\
+    \scalebox{1.25}{$\therefore Y_{C,max} = 0.5\ mm = \frac{q*E*T_{C,new}}{2*m}$}
+    \scalebox{1.25}{$\Rightarrow V_{Max,new} = \frac{(0.5\ mm)*2*m*w}{q*t^2} = 652.6\ V$}
+    \scalebox{1.25}{$\Rightarrow V_{Y_3} = \frac{q*E_{max}*T_{C,new}}{2*m} = 10\ m/s$}
+    \scalebox{1.25}{$\Rightarrow Y{3,max} = 0.625\ mm$}
+    \begin{tabular}{| c |}
+        \hline \\
+        \scalebox{1.25}{$\therefore Biggest\ "I" = 2.25\ mm$}\\ \\
+        \hline     
+    \end{tabular}
+\end{center}
 \end{document}
