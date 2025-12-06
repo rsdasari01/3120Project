@@ -2,24 +2,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+I_TRUE = False
+H_TRUE = False
+while not I_TRUE and not H_TRUE:
+    IorH = input("Select I or H. ")
+    if IorH == "I":
+        I_TRUE = True
+    if IorH == "H":
+        H_TRUE = True
+
 # DROPLET CONSTANTS
-droplet_diameter = 8.4e-5
+droplet_diameter = input("Enter droplet diameter in um (default = 84): ")
+droplet_diameter = float(droplet_diameter)/1000000
 r = droplet_diameter / 2
-q = -1.9e-10
+q = float(input("Enter droplet charge in C (default = -1.9e-10): "))
 droplet_density = 1000
 droplet_volume = (4/3)*(np.pi * r**3)
 m = droplet_density * droplet_volume
 
 # SETUP
-w = 0.001
-D = 0.003
-L1 = 0.0005
-L2 = 0.00125
-L0 = D - (L1 + L2)                                      # distance from gun to capacitor
+L0 = 1.25/1000                                          # distance from gun to capacitor
+L1 = input("Enter L1 in mm (default = 0.5): ")          # length of capacitor
+L1 = float(L1)/1000
+L2 = input("Enter L2 in mm (default = 1.25): ")         # distance capacitor to wall
+L2 = float(L2)/1000
+D = L0 + L1 + L2                                        # total distance
+w = 1/1000                                              # width between plates
 dpm = 300/0.0254                                        # 300 dpi to dpm
 
 # KINEMATIC CONSTANTS
-v_z = 20.0
+v_z = float(input("Enter speed  in m/s (default = 20): "))
 Tc = L1 / v_z                                           # time spent inside capacitor
 T1 = L0 / v_z                                           # time at capacitor entry
 T2 = T1 + Tc                                            # time at capacitor exit
@@ -29,13 +41,16 @@ firing_period = Tc
 # necessary voltage step for 300 dpi. around 73.8 V per dot.
 V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1
 
-line_height = .006                                                  # length of vertical line
-line_width = .006                                                   # length of horizontal line
+line_height = .006                                                  # CHANGE TO MAX HEIGHT CALCULATION
+line_width = .006                                                   # CHANGE TO MAX LENGTH CALCULATION
 N1 = 2 * (np.floor(dpm * line_height).astype(int) + 1)              # number of dots required for vertical
 N2 = np.floor(dpm * line_width).astype(int) + 1                     # number of dots required for horizontal
-N_TOTAL = N1 + N2
+if I_TRUE:
+    N_TOTAL = N1 // 2
+else:
+    N_TOTAL = N1 + N2
 T_TOTAL = (T3 + (N_TOTAL - 1) * firing_period)                      # total time for all droplets to finish
-NUM_POINTS = 2000                                                   # resolution
+NUM_POINTS = 500                                                   # resolution
 # time vector containing all t values from 0 to T_TOTAL
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
@@ -45,7 +60,7 @@ def get_index(time):
     return index
 
 # matrix to hold all positions for each droplet
-# rows will be accessed and updated in for loop
+# rows will be accessed and updated in for loop below
 # initialize arrays to starting position (0, 0, D)
 x_array = np.zeros((N_TOTAL, NUM_POINTS))
 y_array = np.zeros((N_TOTAL, NUM_POINTS))
@@ -73,14 +88,17 @@ for i in range(N_TOTAL):
     t_local2 = t_global[index2:index3] - t_global[index2]     # T2 to T3, used for trajectory after capacitor
 
     # Z POSITIONS                                             # all dots have the same z motion
-    z_vector = z_array[i]                                     # access row i of array
+    z_vector = z_array[i]
     z_vector[index0:index3] = -v_z * t_local0 + D             # t_local0 used because the z motion is governed by one equation the entire time
-    z_vector[index3:] = 0                                     # sets resting position
-    z_array[i] = z_vector
+    z_vector[index3:] = 0                                     # set resting position
+    z_array[i] = z_vector                                     # update row i of z_array
 
     if i < N1:                                                                  # first N1 iterations draws the two vertical strokes
         # x kinematic values
-        Vx = sign * (0.003 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))         # necessary x voltage to deflect drop by 3 mm
+        if I_TRUE:
+            Vx = 0
+        else:
+            Vx = sign * (0.003 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))         # necessary x voltage to deflect drop by 3 mm
         Ex = Vx / w
         vx_exit = (q * Ex * Tc) / m                                             # x velocity after exiting capacitor
         x_exit = (q * Ex * Tc ** 2) / (2 * m)                                   # x position after exiting capacitor
@@ -93,7 +111,7 @@ for i in range(N_TOTAL):
 
         #  X POSITIONS
         x_vector = x_array[i]
-        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2
+        x_vector[index1: index2] = (q * Ex) / (2 * m) * t_local1 ** 2           # different t_local used for piecewise function
         x_vector[index2: index3] = vx_exit * t_local2 + x_exit
         x_vector[index3:] = x_vector[index3 - 1]
         x_array[i] = x_vector
@@ -132,16 +150,6 @@ scat = ax.scatter(
     z_array[:, 0] * 1000,
     s=5
 )
-
-# Axis labels in mm
-ax.set_xlabel("X (mm)")
-ax.set_ylabel("Y (mm)")
-ax.set_zlabel("Z (mm)")
-
-# Axis limits
-ax.set_xlim(-3, 3)
-ax.set_ylim(-3, 3)
-ax.set_zlim(D * 1000, 0)   # change once you have real z data
 
 scale = 1
 
@@ -207,6 +215,16 @@ R_body = np.full_like(Z_body, gun_radius_mm)
 X_body = R_body * np.cos(Theta_body)
 Y_body = R_body * np.sin(Theta_body)
 ax.plot_surface(X_body, Y_body, Z_body, color='dimgray', alpha=0.8, linewidth=0, shade=True)
+
+# Axis labels in mm
+ax.set_xlabel("X (mm)")
+ax.set_ylabel("Y (mm)")
+ax.set_zlabel("Z (mm)")
+
+# Axis limits
+ax.set_xlim(-8, 8)
+ax.set_ylim(-8, 8)
+ax.set_zlim(1000*D+0.2, 0)
 
 # Time tracker text
 time_text = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
