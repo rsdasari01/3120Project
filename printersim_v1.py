@@ -143,6 +143,71 @@ ax.set_xlim(-3, 3)
 ax.set_ylim(-3, 3)
 ax.set_zlim(D * 1000, 0)   # change once you have real z data
 
+scale = 1
+
+#Capacitor Plates
+# Adjustable small corner gap (mm) so plate edges don't meet at corners
+gap_mm = 0.2  # change this to increase/decrease the corner gap (mm)
+
+# Plate center positions (mm)
+y_min = (-w * 1000)/2
+y_max = (w * 1000)/2
+
+# Z bounds for the capacitor (mm), lifted by L2
+z_plane = np.array([L2 * 1000, (L1 + L2) * 1000])
+
+# Left/Right plates: keep x positions at +/- w but shorten their y-extent
+y_lr_min = y_min + gap_mm/2
+y_lr_max = y_max - gap_mm/2
+y_plane_lr = np.array([y_lr_min, y_lr_max])
+Y_left, Z_left = np.meshgrid(y_plane_lr, z_plane)
+X_left = np.full_like(Y_left, (-w * 1000)/2)  # left plate at x = -w (mm)
+ax.plot_surface(X_left, Y_left, Z_left, alpha=0.5, color='blue')
+
+X_right = np.full_like(Y_left, (w * 1000)/2)  # right plate at x = +w (mm)
+ax.plot_surface(X_right, Y_left, Z_left, alpha=0.5, color='blue')
+
+# Front/Back plates: keep y positions at +/- w but shorten their x-extent
+x_fb_min = y_min + gap_mm/2
+x_fb_max = y_max - gap_mm/2
+x_plane_fb = np.array([x_fb_min, x_fb_max])
+X_front, Z_front = np.meshgrid(x_plane_fb, z_plane)
+Y_front = np.full_like(X_front, (-w * 1000)/2)  # front plate at y = -w (mm)
+ax.plot_surface(X_front, Y_front, Z_front, alpha=0.5, color='green')
+
+# Back plate at y = +w (mm)
+Y_back = np.full_like(X_front, (w * 1000)/2)
+ax.plot_surface(X_front, Y_back, Z_front, alpha=0.5, color='green')
+
+# Draw droplet gun (cylindrical nozzle with conical tip)
+# All dimensions here are in mm for plotting; the tip end is located at z = D (paper distance)
+gun_radius_mm = 0.5      # cylinder main radius (mm)
+tip_radius_mm = 0.1      # tip end radius (mm)
+tip_length_mm = 0.5      # length of the conical tip (mm)
+body_length_mm = 1.0     # length of the cylindrical body above the tip (mm)
+
+# Z positions (mm)
+tip_end_z_mm = D * 1000
+tip_start_z_mm = tip_end_z_mm + tip_length_mm
+body_end_z_mm = tip_start_z_mm + body_length_mm
+
+# Mesh for tip (cone)
+theta = np.linspace(0, 2 * np.pi, 40)
+z_tip = np.linspace(tip_end_z_mm, tip_start_z_mm, 20)
+Theta_tip, Z_tip = np.meshgrid(theta, z_tip)
+R_tip = tip_radius_mm + (Z_tip - tip_end_z_mm) / tip_length_mm * (gun_radius_mm - tip_radius_mm)
+X_tip = R_tip * np.cos(Theta_tip)
+Y_tip = R_tip * np.sin(Theta_tip)
+ax.plot_surface(X_tip, Y_tip, Z_tip, color='gray', alpha=0.8, linewidth=0, shade=True)
+
+# Mesh for body (cylinder)
+z_body = np.linspace(tip_start_z_mm, body_end_z_mm, 20)
+Theta_body, Z_body = np.meshgrid(theta, z_body)
+R_body = np.full_like(Z_body, gun_radius_mm)
+X_body = R_body * np.cos(Theta_body)
+Y_body = R_body * np.sin(Theta_body)
+ax.plot_surface(X_body, Y_body, Z_body, color='dimgray', alpha=0.8, linewidth=0, shade=True)
+
 # Time tracker text
 time_text = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
 
