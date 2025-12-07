@@ -25,7 +25,7 @@ m = droplet_density * droplet_volume
 L0 = 1.25/1000                                          # distance from gun to capacitor
 L1 = input("Enter L1 in mm (default = 0.5): ")          # length of capacitor
 L1 = float(L1)/1000
-L2 = input("Enter L2 in mm (default = 1.25): ")         # distance capacitor to wall
+L2 = input("Enter L2 in mm (default = 1.25): ")         # distance capacitor to paper
 L2 = float(L2)/1000
 D = L0 + L1 + L2                                        # total distance
 w = 1/1000                                              # width between plates
@@ -36,7 +36,7 @@ v_z = float(input("Enter speed  in m/s (default = 20): "))
 Tc = L1 / v_z                                           # time spent inside capacitor
 T1 = L0 / v_z                                           # time at capacitor entry
 T2 = T1 + Tc                                            # time at capacitor exit
-T3 = D / v_z                                            # time at wall contact
+T3 = D / v_z                                            # time at paper contact
 # 1/Tc is the fastest possible firing rate. anything faster would result in multiple droplets being in the capacitor at the same time.
 firing_period = Tc
 # necessary voltage step for 300 dpi
@@ -51,13 +51,13 @@ max_width = max_length                                              # Same in bo
 N1 = 2 * (np.floor(dpm * max_length).astype(int) + 1)               # number of dots required for vertical stroke
 N2 = np.floor(dpm * max_width).astype(int) + 1                      # number of dots required for horizontal stroke
 
+# time vector containing all t values from 0 to T_TOTAL
 if I_TRUE:
     N_TOTAL = N1 // 2
 else:
     N_TOTAL = N1 + N2
 T_TOTAL = (T3 + (N_TOTAL - 1) * firing_period)                      # total time for all droplets to finish
 NUM_POINTS = 5000                                                   # resolution
-# time vector containing all t values from 0 to T_TOTAL
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
 # converts t values to appropriate array index
@@ -89,7 +89,7 @@ for i in range(N_TOTAL):
     index0 = get_index(firing_period * i)               # time when fired
     index1 = get_index(firing_period * i + T1)          # time when enters capacitor
     index2 = get_index(firing_period * i + T2)          # time when exits capacitor
-    index3 = get_index(firing_period * i + T3)          # time when hits wall
+    index3 = get_index(firing_period * i + T3)          # time when hits paper
 
     # these are the local time vectors for each dot. this is what is actually plugged in for t depending on equation.
     # the subtraction ensures each vector is identical between iterations.
@@ -110,7 +110,6 @@ for i in range(N_TOTAL):
         else:
             # necessary x voltage to deflect in x direction for H
             Vx = sign * (0.5 * max_width * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
-
         Vx_array[i] = Vx
         Ex = Vx / w
         vx_exit = (q * Ex * Tc) / m                                             # x velocity after exiting capacitor
@@ -137,7 +136,7 @@ for i in range(N_TOTAL):
         y_vector[index3:] = y_vector[index3 - 1]
         y_array[i] = y_vector
 
-    else:                   # last N2 iterations to draw horizontal stroke
+    else:                                                       # last N2 iterations to draw horizontal stroke
         shift = N1
         Vx = V_step * (i - shift - np.floor(N2 / 2))            # updates the x voltage each iteration
         Vx_array[i] = Vx
