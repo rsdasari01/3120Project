@@ -72,6 +72,10 @@ x_array = np.zeros((N_TOTAL, NUM_POINTS))
 y_array = np.zeros((N_TOTAL, NUM_POINTS))
 z_array = np.zeros((N_TOTAL, NUM_POINTS)) + D
 
+# Initialize array to hold voltage values
+Vx_array = np.zeros(N_TOTAL)
+Vy_array = np.zeros(N_TOTAL)
+
 for i in range(N_TOTAL):
     if i < N1//2:
         sign = -1                   # sets the sign for the x voltage
@@ -106,12 +110,15 @@ for i in range(N_TOTAL):
         else:
             # necessary x voltage to deflect in x direction for H
             Vx = sign * (0.5 * max_width * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
+
+        Vx_array[i] = Vx
         Ex = Vx / w
         vx_exit = (q * Ex * Tc) / m                                             # x velocity after exiting capacitor
         x_exit = (q * Ex * Tc ** 2) / (2 * m)                                   # x position after exiting capacitor
 
         # y kinematic values
         Vy = V_step * (i - shift - np.floor(N1 / 4))                            # updates the y voltage each iteration
+        Vy_array[i] = Vy
         Ey = Vy / w
         vy_exit = (q * Ey * Tc) / m                                             # y velocity after exiting capacitor
         y_exit = (q * Ey * Tc ** 2) / (2 * m)                                   # y velocity after exiting capacitor
@@ -133,6 +140,7 @@ for i in range(N_TOTAL):
     else:                   # last N2 iterations to draw horizontal stroke
         shift = N1
         Vx = V_step * (i - shift - np.floor(N2 / 2))            # updates the x voltage each iteration
+        Vx_array[i] = Vx
         Ex = Vx / w
         vx_exit = (q * Ex * Tc) / m
         x_exit = (q * Ex * Tc ** 2) / (2 * m)
@@ -259,4 +267,23 @@ anim = FuncAnimation(
     interval=1,
 )
 
+firing_times_ms = np.arange(N_TOTAL) * firing_period * 1000
+
+fig_volt, (ax_vx, ax_vy) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+fig_volt.suptitle(f'Deflection Voltages vs Time (Shape: {"I" if I_TRUE else "H"})')
+
+# Plot X Voltage
+ax_vx.step(firing_times_ms, Vx_array, where='post', color='red', label='Vx (Horizontal)')
+ax_vx.set_ylabel('Voltage X (V)')
+ax_vx.grid(True, linestyle='--', alpha=0.6)
+ax_vx.legend(loc='upper right')
+
+# Plot Y Voltage
+ax_vy.step(firing_times_ms, Vy_array, where='post', color='blue', label='Vy (Vertical)')
+ax_vy.set_xlabel('Firing Time (ms)')
+ax_vy.set_ylabel('Voltage Y (V)')
+ax_vy.grid(True, linestyle='--', alpha=0.6)
+ax_vy.legend(loc='upper right')
+
+plt.tight_layout()
 plt.show()
