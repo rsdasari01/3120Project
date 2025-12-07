@@ -49,7 +49,7 @@
     \end{center}
 \end{titlepage}
 
-\section*{Q1}
+\section*{Q1)}
 \subsection*{Simulate the motion of the droplet when no voltage is applied across the capacitor. How much time would it take for the droplet to reach the center of the paper?}\par
 
 The droplet is travelling along the y-axis towards the paper. Because there is no acceleration in the z-direction:
@@ -63,7 +63,7 @@ The path taken by each droplet regardless of the voltage applied is the same in 
 Solving for time gives us: $\frac{S_Z}{20} = t\ sec$. It is given that the distance from droplet gun to the paper is 3mm.\par
 Therefore, the time taken by a droplet to reach the center of the paper with no voltage applied across the capacitor is \textbf{0.15 milliseconds}.
 
-\section*{Q2}
+\section*{Q2)}
 \subsection*{Simulate the act of drawing a vertical line (similar to the letter “I” ) along the center of the paper at 300 dpi resolution. How much time would it take to draw the letter “I”?}
 
 The time it takes for the letter \textbf{I}, to be drawn depends on two factors:
@@ -103,7 +103,7 @@ We know have all the parts required to find the total time required to the draw 
     \end{tabular}
 \end{center}
 
-\section*{Q3}
+\section*{Q3)}
 \subsection*{Plot the profile of applied voltage V(t) across the capacitor versus the time t for drawing the letter ‘I’. This profile of V(t) should look like a staircase. V(t) will remain constant until a droplet exits the capacitor chamber, and immediately it will switch to the next value in order to control the next incoming droplet. How big the letter ‘I’ could be drawn on the paper?}
 
 The largest letter "I" that can be drawn is 6mm, this is due to the maximum deflection within the capacitor being 0.5m. If you set the y displacement formula equal to 0.5:
@@ -127,7 +127,14 @@ This voltage value gives us the exit velocity of the droplet:
     \end{tabular}
 \end{center}
 
-\section*{Q4}X
+Running the simulation, we also obtained the following plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{I.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
+
+\section*{Q4)}
 \subsection*{Resimulate the act of drawing letter ‘I’ as big as possible consuming as small time as possible for each of the following adjustment of the parameter:\\ }
 \subsubsection*{a) The distance between the capacitor and the paper L2 is threefold increased, and everything else remains same\\}
 \begin{center}
@@ -140,6 +147,13 @@ This voltage value gives us the exit velocity of the droplet:
         \hline     
     \end{tabular}
 \end{center}
+
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Ia.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
 
 \subsubsection*{b) L1 is twofold increased, and everything else remains same}
 \begin{center}
@@ -156,6 +170,13 @@ This voltage value gives us the exit velocity of the droplet:
     \end{tabular}
 \end{center}
 
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Ib.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
+
 \subsubsection*{c) Droplet diameter is tenfold increased, and everything else remains same}
 \begin{center}
     \scalebox{1.25}{$d_{new} = 2*d = 168\ \mu m$} \\
@@ -169,6 +190,13 @@ This voltage value gives us the exit velocity of the droplet:
         \hline     
     \end{tabular}
 \end{center}
+
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Ic.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
 
 \subsubsection*{d) The horizontal speed at which the gun shoots the droplet is twofold increased, and everything else remains same}
 \begin{center}
@@ -184,6 +212,13 @@ This voltage value gives us the exit velocity of the droplet:
     \end{tabular}
 \end{center}
 
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Id.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
+
 \subsubsection*{e) The charge of the droplet is fivefold increased, and everything else remains same.}
 \begin{center}
     \scalebox{1.25}{$q_{new} = 5*q = -9.5*10^{-10}$} \\
@@ -197,7 +232,14 @@ This voltage value gives us the exit velocity of the droplet:
     \end{tabular}
 \end{center}
 
-\subsection*{Q5}
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{Ie.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
+
+\subsection*{Q5)}
 For our design paramters, we used the same values as before because any changes to these values brought scaling issues in simulation due to the assymmetry between both pairs of capacitors. In addition, there are an excess of additional conditions needed to be programmed, further enforcing our decision to use the same parameters for these additional capacitors. Simulating this new setup gave us an "H" that had dimensions \textbf{6 mm x 6 mm}.
 
 The links below will take you to our:
@@ -206,4 +248,11 @@ The links below will take you to our:
     \item \href{https://github.com/rsdasari01/3120Project.git}{GitHub Repo}
     \item \href{https://www.youtube.com/watch?v=jl7tbc9HKgs}{Video Demonstration}
 \end{itemize}
+
+Obtained plot:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{H.png}
+    \caption{V(t) across the capacitor VS. Time(s)}
+\end{figure}
 \end{document}
