@@ -13,9 +13,10 @@ while not I_TRUE and not H_TRUE:
 
 # DROPLET CONSTANTS
 droplet_diameter = input("Enter droplet diameter in um (default = 84): ")
-droplet_diameter = float(droplet_diameter)/1000000
+droplet_diameter = float(droplet_diameter) * 10**-6
 r = droplet_diameter / 2
-q = float(input("Enter droplet charge in C (default = -1.9e-10): "))
+q = input("Enter droplet charge in nC (default = 0.19): ")
+q = float(q) * 10**-9
 droplet_density = 1000
 droplet_volume = (4/3)*(np.pi * r**3)
 m = droplet_density * droplet_volume
@@ -38,19 +39,24 @@ T2 = T1 + Tc                                            # time at capacitor exit
 T3 = D / v_z                                            # time at wall contact
 # 1/Tc is the fastest possible firing rate. anything faster would result in multiple droplets being in the capacitor at the same time.
 firing_period = Tc
-# necessary voltage step for 300 dpi. around 73.8 V per dot.
+# necessary voltage step for 300 dpi
 V_step = ( ( (q*Tc)/(m*w) ) * (Tc/2 + (T3 - T2)) * dpm ) ** -1
 
-line_height = .006                                                  # CHANGE TO MAX HEIGHT CALCULATION
-line_width = .006                                                   # CHANGE TO MAX LENGTH CALCULATION
-N1 = 2 * (np.floor(dpm * line_height).astype(int) + 1)              # number of dots required for vertical
-N2 = np.floor(dpm * line_width).astype(int) + 1                     # number of dots required for horizontal
+# calculate the largest possible line in both directions
+V_max = (w/2 * 2 * m * w) / (q*Tc**2)                               # maximum possible voltage
+v_exit = (q * V_max * Tc) / (w*m)                                   # exit velocity
+cruise_distance = v_exit * (L2/v_z)                                 # displacement after capacitor
+max_length = 2*(cruise_distance + w/2)                              # Largest possible line
+max_width = max_length                                              # Same in both directions because capacitors are symmetrical
+N1 = 2 * (np.floor(dpm * max_length).astype(int) + 1)               # number of dots required for vertical stroke
+N2 = np.floor(dpm * max_width).astype(int) + 1                      # number of dots required for horizontal stroke
+
 if I_TRUE:
     N_TOTAL = N1 // 2
 else:
     N_TOTAL = N1 + N2
 T_TOTAL = (T3 + (N_TOTAL - 1) * firing_period)                      # total time for all droplets to finish
-NUM_POINTS = 500                                                   # resolution
+NUM_POINTS = 5000                                                   # resolution
 # time vector containing all t values from 0 to T_TOTAL
 t_global = np.linspace(0, T_TOTAL, NUM_POINTS)
 
@@ -98,7 +104,8 @@ for i in range(N_TOTAL):
         if I_TRUE:
             Vx = 0
         else:
-            Vx = sign * (0.003 * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))         # necessary x voltage to deflect drop by 3 mm
+            # necessary x voltage to deflect in x direction for H
+            Vx = sign * (0.5 * max_width * m * w) / ((q * Tc) * (0.5 * Tc + T3 - T2))
         Ex = Vx / w
         vx_exit = (q * Ex * Tc) / m                                             # x velocity after exiting capacitor
         x_exit = (q * Ex * Tc ** 2) / (2 * m)                                   # x position after exiting capacitor
@@ -144,14 +151,17 @@ fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.view_init(elev=-20, azim=70, roll=-180)
 
-scat = ax.scatter(
-    x_array[:, 0] * 1000,   # convert to mm
-    y_array[:, 0] * 1000,
-    z_array[:, 0] * 1000,
-    s=5
-)
+# Axis labels in mm
+ax.set_xlabel("X (mm)")
+ax.set_ylabel("Y (mm)")
+ax.set_zlabel("Z (mm)")
 
-scale = 1
+axis_max = max_length*1000 + 1
+
+# Axis limits
+ax.set_xlim(-axis_max, axis_max)
+ax.set_ylim(-axis_max, axis_max)
+ax.set_zlim(1000*D, 0)
 
 #Capacitor Plates
 # Adjustable small corner gap (mm) so plate edges don't meet at corners
@@ -175,7 +185,7 @@ ax.plot_surface(X_left, Y_left, Z_left, alpha=0.5, color='blue')
 X_right = np.full_like(Y_left, (w * 1000)/2)  # right plate at x = +w (mm)
 ax.plot_surface(X_right, Y_left, Z_left, alpha=0.5, color='blue')
 
-# Front/Back plates: keep y positions at +/- w but shorten their x-extent
+# Front/Backplates: keep y positions at +/- w but shorten their x-extent
 x_fb_min = y_min + gap_mm/2
 x_fb_max = y_max - gap_mm/2
 x_plane_fb = np.array([x_fb_min, x_fb_max])
@@ -183,7 +193,7 @@ X_front, Z_front = np.meshgrid(x_plane_fb, z_plane)
 Y_front = np.full_like(X_front, (-w * 1000)/2)  # front plate at y = -w (mm)
 ax.plot_surface(X_front, Y_front, Z_front, alpha=0.5, color='green')
 
-# Back plate at y = +w (mm)
+# Backplate at y = +w (mm)
 Y_back = np.full_like(X_front, (w * 1000)/2)
 ax.plot_surface(X_front, Y_back, Z_front, alpha=0.5, color='green')
 
@@ -216,15 +226,12 @@ X_body = R_body * np.cos(Theta_body)
 Y_body = R_body * np.sin(Theta_body)
 ax.plot_surface(X_body, Y_body, Z_body, color='dimgray', alpha=0.8, linewidth=0, shade=True)
 
-# Axis labels in mm
-ax.set_xlabel("X (mm)")
-ax.set_ylabel("Y (mm)")
-ax.set_zlabel("Z (mm)")
-
-# Axis limits
-ax.set_xlim(-8, 8)
-ax.set_ylim(-8, 8)
-ax.set_zlim(1000*D+0.2, 0)
+scat = ax.scatter(
+    x_array[:, 0] * 1000,   # convert to mm
+    y_array[:, 0] * 1000,
+    z_array[:, 0] * 1000,
+    s=5
+)
 
 # Time tracker text
 time_text = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
@@ -243,11 +250,12 @@ def update(frame):
 
     return scat, time_text
 
+FRAME_STEP = 20
 anim = FuncAnimation(
     fig,
     update,
     repeat=False,
-    frames=NUM_POINTS,
+    frames=range(0, NUM_POINTS, FRAME_STEP),
     interval=1,
 )
 
